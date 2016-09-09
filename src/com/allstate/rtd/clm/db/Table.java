@@ -7,6 +7,8 @@ public class Table {
 
     public String name;
     public List<String> columns = new ArrayList();
+    public List<String> removedColumns = new ArrayList();
+    public List<String> addedColumns = new ArrayList();
     public List<String> columnType = new ArrayList();
     public List<Integer> columnPrecision = new ArrayList();
     public List<List<String>> data = new ArrayList();

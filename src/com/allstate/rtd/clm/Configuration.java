@@ -12,6 +12,7 @@ public class Configuration {
     public final String DB_URL;
     public final String OUT_FILE;
     public final String TABLE_OWNER;
+    public final String INSERT_FILE;
 
     public Configuration()
     {
@@ -33,6 +34,7 @@ public class Configuration {
             DB_URL = prop.getProperty("databaseUrl");
             OUT_FILE = prop.getProperty("outputfile");
             TABLE_OWNER = prop.getProperty("tableOwner");
+            INSERT_FILE = prop.getProperty("oracleLoadScriptLocation");
         }
     }
     @Override
@@ -41,6 +43,7 @@ public class Configuration {
                 "\nDB_USER=" + DB_USER + "\n" +
                 "DB_PASS=" + DB_PASS +  "\n" +
                 "DB_URL=" + DB_URL +   "\n" +
+                "INSERT_FILE=" + INSERT_FILE +   "\n" +
                 "OUT_FILE=" + OUT_FILE + "\n";
     }
 }

@@ -7,4 +7,5 @@
 *.iml
 out
 gen
-#config.properties
+config.properties
+insert_data.sql
