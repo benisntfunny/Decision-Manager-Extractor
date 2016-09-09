@@ -2,9 +2,8 @@
 
 Add config.properties to base directory
 
-```
 **config.properties**
------------------------
+```properties
 databaseUser=EXAMPLEUSER1
 databaseUserPassword=PASSWORD
 databaseUrl=jdbc:oracle:thin:@ldap://server:port/HOSTNAME,cn=OracleContext,dc=domain,dc=com
