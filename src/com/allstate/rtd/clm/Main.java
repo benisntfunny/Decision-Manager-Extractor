@@ -77,29 +77,6 @@ public class Main {
             }
             System.out.println();
         }
-        /*
-        Iterator it = data.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry)it.next();
-            System.out.println(pair.getKey());
-            List<List<String>> currentTable = (List<List<String>>) pair.getValue();
-
-            int numColumns = currentTable.get(0).size();
-
-            for (int i=1;i<currentTable.size();i++)
-            {
-                for (int column=0;column<numColumns;column++){
-                    if (column != numColumns - 1)
-                    System.out.printf("'" + currentTable.get(i).get(column) + "',");
-                    else
-                    System.out.printf("'" + currentTable.get(i).get(column) + "'");
-                }
-                System.out.println();
-            }
-
-            it.remove(); // avoids a ConcurrentModificationException
-        }
-        */
     }
 
 
