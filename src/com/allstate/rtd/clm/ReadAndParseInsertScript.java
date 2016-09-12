@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -106,6 +107,58 @@ public class ReadAndParseInsertScript {
             }
             tables.add(table);
         }
+        Table cgroup = new Table();
+        Table rtype = new Table();
+        Table choiceAttribute = new Table();
+            /* Make choice group table */
+        cgroup.name = "CHOICE_GROUP";
+        cgroup.columns.add("CHOICE_GROUP_ID");
+        cgroup.columns.add("NAME");
+        cgroup.columns.add("SEARCH_SORT_ORDER");
+        cgroup.columns.add("CREATE_SORT_ORDER");
+
+            /* Make relationship type table */
+        rtype.name = "RELATIONSHIP_TYPE";
+        String[] rtypeColumns = {"RELATIONSHIP_TYPE_ID", "FROM_CHOICE_GROUP_ID", "TO_CHOICE_GROUP_ID", "FROM_NAME", "FROM_DESCRIPTION",
+                "TO_NAME", "TO_DESCRIPTION", "CARDINALITY", "ON_DELETE", "PROPAGATE_RULES",
+                "           PROPAGATE_EVENTS"};
+        rtype.columns=Arrays.asList(rtypeColumns);
+
+            /* Make choice attribute table */
+        choiceAttribute.name = "CHOICE_ATTRIBUTE";
+        choiceAttribute.columns.add("CHOICE_GROUP_ID");
+        choiceAttribute.columns.add("ATTRIBUTE_NAME");
+        choiceAttribute.columns.add("RULE_TYPE");
+        for (int i=0;i<insertScript.size();i++)
+        {
+            String line = insertScript.get(i).trim();
+            if (line.contains("INSERT INTO CHOICE_GROUP"))
+            {
+                i++;
+                List<String> row = makeRowFromInsert(insertScript.get(i));
+                cgroup.data.add(row);
+            }
+            if (line.contains("INSERT INTO RELATIONSHIP_TYPE"))
+            {
+                i++;
+                List<String> row = makeRowFromInsert(insertScript.get(i));
+                rtype.data.add(row);
+            }
+            if (line.contains("INSERT INTO CHOICE_ATTRIBUTE"))
+            {
+                i++;
+                List<String> row = makeRowFromInsert(insertScript.get(i));
+                choiceAttribute.data.add(row);
+            }
+        }
+        tables.add(rtype);tables.add(cgroup);tables.add(choiceAttribute);
     }
 
+    private List<String> makeRowFromInsert(String text){
+        text = text.replaceAll("', '",",").replaceAll("\\('","").replaceAll("'\\);","").replaceAll("\\);","").replaceAll(" , ",",").replaceAll("',",",")
+        .replaceAll(",'",",").replace(", ",",").replace(" ,",",").trim();
+        List<String> row = Arrays.asList(text.split(","));
+        //Print.out(row);
+        return row;
+    }
 }

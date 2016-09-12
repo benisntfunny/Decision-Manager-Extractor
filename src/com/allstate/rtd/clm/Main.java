@@ -1,19 +1,19 @@
 package com.allstate.rtd.clm;
 
 import com.allstate.rtd.clm.db.Table;
-import oracle.jdbc.OracleResultSet;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Main {
+
     static Configuration config = new Configuration();
     static private List<Table> tables = new ArrayList();
     public static void main(String[] args) {
         ReadAndParseInsertScript rap = new ReadAndParseInsertScript(config.INSERT_FILE);
-        Print.out(rap.getTables());
+        //Print.out(rap.getTables());
         scanDB();
     }
 
@@ -30,29 +30,56 @@ public class Main {
 
                 Table ct = tables.get(i);
                 fw.write("/************** " + ct.name + " **************/\n");
+                Print.out("/************** " + ct.name + " **************/\n");
                 fw.write("/* " + ct.columns + " */\n");
+                Print.out("/* " + ct.columns + " */\n");
                 ct.columnCount = ct.columns.size();
 
                 for (int row = 0; row < ct.data.size(); row++) {
                     fw.write("INSERT INTO " + ct.name + " (" + ct.columns.toString().replaceAll(",", ",").replaceAll("[\\[.\\].\\s+]", "") +
                             ") VALUES (");
+                    Print.outf("INSERT INTO " + ct.name + " (" + ct.columns.toString().replaceAll(",", ",").replaceAll("[\\[.\\].\\s+]", "") +
+                            ") VALUES (");
                     for (int column = 0; column < ct.columnCount; column++) {
 
-                        if (column != ct.columnCount - 1)
-                            fw.write("'" + ct.data.get(row).get(column).replaceAll("'","''") + "',");
-                        else
-                            fw.write("'" + ct.data.get(row).get(column).replaceAll("'","''") + "'");
+                        if (column != ct.columnCount - 1) {
+                            if (ct.data.get(row).get(column).equals("null")) {
+                                fw.write("null,");
+                                Print.outf("null,");
+                            }
+                            else
+                            {
+                                fw.write("'" + ct.data.get(row).get(column).replaceAll("'", "''") + "',");
+                                Print.outf("'" + ct.data.get(row).get(column).replaceAll("'", "''") + "',");
+                            }
+                        }
+                        else {
+                            if (ct.data.get(row).get(column).equals("null"))
+                            {
+                                fw.write("null");
+                                Print.outf("null");
+                            }
+                            else
+                            {
+                                fw.write("'" + ct.data.get(row).get(column).replaceAll("'", "''") + "'");
+                                Print.outf("'" + ct.data.get(row).get(column).replaceAll("'", "''") + "'");
+                            }
+                        }
 
                     }
                     fw.write(");\n");
+                    Print.outf(");\n");
                 }
                 fw.write("\n");
+                Print.outf("\n");
+
             }
             fw.close();
         }
         catch (Exception e){
-
+        Print.out("\n" + e);
         }
+
     }
 
     private static void scanDB()
@@ -61,15 +88,14 @@ public class Main {
         try {
             Connection connection = null;
             connection = DriverManager.getConnection(config.DB_URL, config.DB_USER, config.DB_PASS);
-
             String query = "select DISTINCT TABLE_NAME\n" +
                     "from all_tab_cols\n" +
                     "where owner = '"+ config.TABLE_OWNER+"'\n" +
                     " AND TABLE_NAME NOT LIKE 'V_%' AND TABLE_NAME != 'DMCONFIG'" +
                     " AND TABLE_NAME != 'SCHEMA_VERSION' AND TABLE_NAME != 'PROJECT'" +
-                    " AND TABLE_NAME != 'ILS_PROJECT' AND TABLE_NAME != 'PS_TXN'" +
-                    " AND TABLE_NAME != 'NOTE' AND TABLE_NAME != 'CHOICE_GROUP' AND TABLE_NAME != 'CHOICE_ATTRIBUTE'" +
-                    " AND TABLE_NAME != 'RELATIONSHIP_TYPE' ";
+                    " AND TABLE_NAME != 'PS_TXN' AND \n (TABLE_NAME LIKE 'ILS_%' OR TABLE_NAME = 'RELATIONSHIP' "+
+                    " OR TABLE_NAME = 'CHOICE_GROUP' \n OR TABLE_NAME = 'CHOICE_ATTRIBUTE' OR TABLE_NAME = 'NOTE' " +
+                    " OR TABLE_NAME = 'RELATIONSHIP_TYPE' OR TABLE_NAME = 'CHOICE')";
             Table queryTables = new Table();
             queryTables.name = "queryTables";
             queryTables = selectTable(connection,query,queryTables);

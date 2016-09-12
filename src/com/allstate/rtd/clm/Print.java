@@ -1,17 +1,23 @@
 package com.allstate.rtd.clm;
 
-import static java.lang.System.*;
-
-
 public class Print {
+    static final boolean DEBUG = true;
 
     public static void out(Object print){
-        System.out.println(print);
+        if (DEBUG) System.out.println(print);
     }
     public static void out(Object[] print){
-        System.out.println(print);
+        if (DEBUG) System.out.println(print);
     }
     public static void out(){
-        System.out.println();
+        if (DEBUG) System.out.println();
+    }
+    public static void outf(String print)
+    {
+        if (DEBUG)
+        {
+            print = print.replaceAll("%","%%");
+            System.out.printf(print);
+        }
     }
 }
