@@ -11,6 +11,7 @@ public class Table {
     public List<String> addedColumns = new ArrayList();
     public List<String> columnType = new ArrayList();
     public List<Integer> columnPrecision = new ArrayList();
+    public List<Boolean> columnNullable = new ArrayList();
     public List<List<String>> data = new ArrayList();
     public long columnCount = columns.size();
     public long rowCount = data.size();

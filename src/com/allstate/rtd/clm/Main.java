@@ -11,8 +11,11 @@ public class Main {
 
     static Configuration config = new Configuration();
     static private List<Table> tables = new ArrayList();
+    static ReadAndParseInsertScript rap = new ReadAndParseInsertScript(config.INSERT_FILE);
+    static int maxChoiceSeq = 1000001;
+    static int maxProjectSeq = 2;
+    static int maxNoteSeq = 101;
     public static void main(String[] args) {
-        ReadAndParseInsertScript rap = new ReadAndParseInsertScript(config.INSERT_FILE);
         //Print.out(rap.getTables());
         scanDB();
     }
@@ -22,58 +25,89 @@ public class Main {
         try {
             FileWriter fw = new FileWriter(config.OUT_FILE);
             for (int i = 0; i < tables.size(); i++) {
-            /*
-            System.out.println("Press \"ENTER\" to continue...");
-            Scanner scanner = new Scanner(System.in);
-            scanner.nextLine();
-            */
+
 
                 Table ct = tables.get(i);
-                fw.write("/************** " + ct.name + " **************/\n");
-                Print.out("/************** " + ct.name + " **************/\n");
-                fw.write("/* " + ct.columns + " */\n");
-                Print.out("/* " + ct.columns + " */\n");
-                ct.columnCount = ct.columns.size();
+                if (!ct.name.equalsIgnoreCase("RELATIONSHIP_TYPE")) {
 
-                for (int row = 0; row < ct.data.size(); row++) {
-                    fw.write("INSERT INTO " + ct.name + " (" + ct.columns.toString().replaceAll(",", ",").replaceAll("[\\[.\\].\\s+]", "") +
-                            ") VALUES (");
-                    Print.outf("INSERT INTO " + ct.name + " (" + ct.columns.toString().replaceAll(",", ",").replaceAll("[\\[.\\].\\s+]", "") +
-                            ") VALUES (");
-                    for (int column = 0; column < ct.columnCount; column++) {
-
-                        if (column != ct.columnCount - 1) {
-                            if (ct.data.get(row).get(column).equals("null")) {
-                                fw.write("null,");
-                                Print.outf("null,");
-                            }
-                            else
-                            {
-                                fw.write("'" + ct.data.get(row).get(column).replaceAll("'", "''") + "',");
-                                Print.outf("'" + ct.data.get(row).get(column).replaceAll("'", "''") + "',");
-                            }
-                        }
-                        else {
-                            if (ct.data.get(row).get(column).equals("null"))
-                            {
-                                fw.write("null");
-                                Print.outf("null");
-                            }
-                            else
-                            {
-                                fw.write("'" + ct.data.get(row).get(column).replaceAll("'", "''") + "'");
-                                Print.outf("'" + ct.data.get(row).get(column).replaceAll("'", "''") + "'");
-                            }
-                        }
-
+                    if (ct.name.equals("CHOICE"))
+                    {
+                        String max = ct.data.get(ct.data.size()-1).get(0) + 5;
+                        maxChoiceSeq = Integer.valueOf(max);
                     }
-                    fw.write(");\n");
-                    Print.outf(");\n");
-                }
-                fw.write("\n");
-                Print.outf("\n");
+                    if (ct.name.equals("NOTE"))
+                    {
+                        String max = ct.data.get(ct.data.size()-1).get(0) + 5;
+                        maxNoteSeq = Integer.valueOf(max);
+                    }
+                    if (ct.name.equals("PROJECT"))
+                    {
+                        for (int x=ct.data.size()-1;x>=0;x--){
+                            try {
+                                if (Integer.valueOf(ct.data.get(x).get(1)) > maxProjectSeq)
+                                {
+                                    maxProjectSeq = Integer.valueOf(ct.data.get(x).get(1)) + 100;
+                                }
+                            }
+                            catch (Exception e){
+                            }
+                        }
+                    }
+                    fw.write("/************** " + ct.name + " **************/\n");
+                    Print.out("/************** " + ct.name + " **************/\n");
+                    fw.write("/* " + ct.columns + " */\n");
+                    Print.out("/* " + ct.columns + " */\n");
+                    ct.columnCount = ct.columns.size();
 
+                    for (int row = 0; row < ct.data.size(); row++) {
+                        fw.write("INSERT INTO " + ct.name + " (" + ct.columns.toString().replaceAll(",", ",").replaceAll("[\\[.\\].\\s+]", "") +
+                                ") VALUES (");
+                        Print.outf("INSERT INTO " + ct.name + " (" + ct.columns.toString().replaceAll(",", ",").replaceAll("[\\[.\\].\\s+]", "") +
+                                ") VALUES (");
+                        for (int column = 0; column < ct.columnCount; column++) {
+
+                            if (column != ct.columnCount - 1) {
+                                if (ct.data.get(row).get(column).equals("null")) {
+                                    fw.write("null,");
+                                    Print.outf("null,");
+                                } else {
+                                    fw.write("'" + ct.data.get(row).get(column).replaceAll("'", "''") + "',");
+                                    Print.outf("'" + ct.data.get(row).get(column).replaceAll("'", "''") + "',");
+                                }
+                            } else {
+                                if (ct.data.get(row).get(column).equals("null")) {
+                                    fw.write("null");
+                                    Print.outf("null");
+                                } else {
+                                    fw.write("'" + ct.data.get(row).get(column).replaceAll("'", "''") + "'");
+                                    Print.outf("'" + ct.data.get(row).get(column).replaceAll("'", "''") + "'");
+                                }
+                            }
+
+                        }
+                        fw.write(");\n");
+                        Print.outf(");\n");
+                    }
+                    fw.write("\n");
+                    Print.outf("\n");
+
+                }
             }
+            fw.write("DROP SEQUENCE NOTE_SEQ;\n" +
+                    "DROP SEQUENCE CHOICE_SEQ;\n" +
+                    "DROP SEQUENCE PROJ_DEPLOY_SEQ;\n\n");
+            Print.out("DROP SEQUENCE NOTE_SEQ;\n" +
+                    "DROP SEQUENCE CHOICE_SEQ;\n" +
+                    "DROP SEQUENCE PROJ_DEPLOY_SEQ;\n");
+            fw.write("CREATE SEQUENCE NOTE_SEQ INCREMENT BY 1 START WITH 100 CACHE 10;\n");
+            fw.write("CREATE SEQUENCE PROJ_DEPLOY_SEQ INCREMENT BY 1 START WITH 1;\n");
+            fw.write("CREATE SEQUENCE CHOICE_SEQ INCREMENT BY 1 START WITH 1000000 CACHE 10;\n");
+            fw.write("COMMIT;");
+            Print.out("CREATE SEQUENCE NOTE_SEQ INCREMENT BY 1 START WITH " + String.valueOf(maxNoteSeq) +" CACHE 10;");
+            Print.out("CREATE SEQUENCE PROJ_DEPLOY_SEQ INCREMENT BY 1 START WITH "+ String.valueOf(maxProjectSeq) +";");
+            Print.out("CREATE SEQUENCE CHOICE_SEQ INCREMENT BY 1 START WITH "+ String.valueOf(maxChoiceSeq) +" CACHE 10;\n");
+            Print.out("COMMIT;");
+
             fw.close();
         }
         catch (Exception e){
@@ -92,10 +126,10 @@ public class Main {
                     "from all_tab_cols\n" +
                     "where owner = '"+ config.TABLE_OWNER+"'\n" +
                     " AND TABLE_NAME NOT LIKE 'V_%' AND TABLE_NAME != 'DMCONFIG'" +
-                    " AND TABLE_NAME != 'SCHEMA_VERSION' AND TABLE_NAME != 'PROJECT'" +
+                    " AND TABLE_NAME != 'SCHEMA_VERSION' " +
                     " AND TABLE_NAME != 'PS_TXN' AND \n (TABLE_NAME LIKE 'ILS_%' OR TABLE_NAME = 'RELATIONSHIP' "+
-                    " OR TABLE_NAME = 'CHOICE_GROUP' \n OR TABLE_NAME = 'CHOICE_ATTRIBUTE' OR TABLE_NAME = 'NOTE' " +
-                    " OR TABLE_NAME = 'RELATIONSHIP_TYPE' OR TABLE_NAME = 'CHOICE')";
+                    " OR TABLE_NAME = 'CHOICE_GROUP' \n OR TABLE_NAME = 'NOTE' " +
+                    " OR TABLE_NAME = 'RELATIONSHIP_TYPE' OR TABLE_NAME = 'CHOICE' OR TABLE_NAME = 'PROJECT')";
             Table queryTables = new Table();
             queryTables.name = "queryTables";
             queryTables = selectTable(connection,query,queryTables);
@@ -107,8 +141,12 @@ public class Main {
                 currentTable = selectTable(connection,query,currentTable);
                 tables.add(currentTable);
             }
-            makeResults();
             connection.close();
+
+            CompareOps comp = new CompareOps(rap,tables);
+            tables = comp.getResult();
+            makeResults();
+
 
         } catch (SQLException sqle) {
             sqle.printStackTrace();

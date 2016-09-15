@@ -18,7 +18,7 @@ public class ReadAndParseInsertScript {
 
     private String scriptLocation;
     private List<String> insertScript = new ArrayList();
-    private List<String> tableNames = new ArrayList();
+    public List<String> tableNames = new ArrayList();
     private List<Table> tables = new ArrayList();
 
     public List<Table> getTables() {
@@ -28,7 +28,7 @@ public class ReadAndParseInsertScript {
     public ReadAndParseInsertScript (String script){
         scriptLocation = script;
 
-        Print.out(scriptLocation);
+        //Print.out(scriptLocation);
         try {
             BufferedReader bufferedreader = new BufferedReader(new FileReader(scriptLocation));
 
@@ -47,7 +47,7 @@ public class ReadAndParseInsertScript {
         for (int i=0;i<insertScript.size();i++)
         {
             String line = insertScript.get(i).trim();
-            if (line.contains("CREATE TABLE") && !line.contains("CREATE TABLE ILS_PROJECT"))
+            if (line.contains("CREATE TABLE"))
             {
                 tableNames.add(line.replace("CREATE TABLE ",""));
             }
@@ -97,6 +97,10 @@ public class ReadAndParseInsertScript {
                                     }
                                     table.columnPrecision.add(percision);
                                 }
+                                if (line.contains("NOT NULL")) {
+                                    table.columnNullable.add(false);
+                                }
+                                else table.columnNullable.add(true);
                                 //Print.out(line);
                             } else {
                                 finishedReading = true;
