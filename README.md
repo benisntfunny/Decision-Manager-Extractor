@@ -2,7 +2,7 @@
 
 **When/How to use**
 * **WHEN** You make changes to an existing Decision Manager instance and want to persist existing data
-* **HOW** Prior to running remove scripts run this and have it point to your "load ils.sql" file generated after building your clm project. The utility will read the configured database and compare it to your "load ils.sql" file and generate an insert script for your existing data.
+* **HOW** Prior to running remove scripts run this and have it point to your _load ils.sql_ file generated after building your clm project. The utility will read the configured database and compare it to your _load ils.sql_ file and generate an insert script for your existing data.
 
 Add config.properties to base directory
 
